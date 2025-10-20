@@ -37,9 +37,6 @@ export default function Todolist() {
                 <i data-feather="moon"></i>
               </button>
             </div>
-            <p className="text-indigo-100 mt-1">
-              Your daily dose of productivity
-            </p>
           </div>
 
           <div className="p-6 border-b">
@@ -58,16 +55,21 @@ export default function Todolist() {
                 className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors flex items-center"
                 onClick={handleAdd}
               >
-                <i data-feather="plus" className="mr-1"></i> Add
+                <i data-feather="plus" className="mr-1"></i> Thêm
               </button>
             </div>
           </div>
-
+          {todo.length === 0 && (
+            <div className="text-center py-8 text-gray-400" id="empty-state">
+              <i data-feather="inbox" className="w-12 h-12 mx-auto mb-3"></i>
+              <p>Chưa có nhiệm vụ nào.Hãy thêm một nhiệm vụ ở trên!</p>
+            </div>
+          )}
           <div className="p-6">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-700">Tasks</h2>
+              <h2 className="text-lg font-semibold text-gray-700">Nhiệm vụ</h2>
               <div id="task-count" className="text-sm text-gray-500">
-                0 tasks
+                {todo.length} nhiệm vụ
               </div>
             </div>
 
@@ -81,19 +83,18 @@ export default function Todolist() {
                     onDelete={() => handleDelete(index)}
                   />
                 ))}
-                <p>No tasks yet. Add one above!</p>
               </div>
             </div>
           </div>
 
           <div className="bg-gray-50 px-6 py-4 text-center text-sm text-gray-500">
             <p>
-              Made with{" "}
+              Tạo công việc{" "}
               <i
                 data-feather="heart"
                 className="inline w-4 h-4 text-red-500"
               ></i>{" "}
-              for productive people
+              cho những người năng suất
             </p>
           </div>
         </div>

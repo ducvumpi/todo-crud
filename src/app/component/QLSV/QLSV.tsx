@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import {
   TableContainer,
@@ -16,63 +14,89 @@ import {
   DialogActions,
   TextField,
 } from "@mui/material";
-import { useEffect, useState } from "react";
-import { getStudents, Student } from "@/app/API/StudemtAPI";
+import { useState } from "react";
 
+interface DSSV {
+  id: number;
+  fullname: string;
+  birthday: string;
+  idcard: number;
+  classsv: string;
+}
+
+// Hàm tạo dữ liệu (giống constructor)
+function createData(
+  id: number,
+  fullname: string,
+  birthday: string,
+  idcard: number,
+  classsv: string
+): DSSV {
+  return { id, fullname, birthday, idcard, classsv };
+}
 export default function QLSV() {
-  const [rows, setRows] = useState<Student[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [rows, setRows] = useState<DSSV[]>([
+    createData(1, "Nguyen Van A", "2000-01-01", 123456789, "10A"),
+    createData(2, "Tran Thi B", "2000-02-02", 987654321, "10B"),
+  ]);
   const [openAdd, setOpenAdd] = useState(false);
+  const [openEdit, setOpenEdit] = useState(false);
 
-  const [currentStudent, setCurrentStudent] = useState<Student>({
+  const [currentStudent, setCurrentStudent] = useState<DSSV>({
     id: 0,
-    firstname: "",
-    lastname: "",
-    email: "",
-    phone: "",
+    fullname: "",
+    birthday: "",
+    idcard: 0,
+    classsv: "",
   });
 
-  useEffect(() => {
-    async function fetchData() {
-      const data = await getStudents();
-      setRows(data.data);
-      setLoading(false);
-    }
-    fetchData();
-  }, []);
-
-  const handleChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setCurrentStudent((prev) => ({ ...prev, [name]: value }));
+    setCurrentStudent({ ...currentStudent, [name]: value });
   };
 
   const handleAddStudent = () => {
-    setRows((prev) => [...prev, { ...currentStudent, id: prev.length + 1 }]);
-    setCurrentStudent({
-      id: 0,
-      firstname: "",
-      lastname: "",
-      email: "",
-      phone: "",
-    });
+    const newID = rows.length + 1;
+    const newrows = { ...currentStudent, id: newID };
+    setRows((prev) => [...prev, newrows]);
     setOpenAdd(false);
   };
-
-  if (loading) return <p>Đang tải dữ liệu...</p>;
+  const handleClickOpenAdd = () => {
+    setCurrentStudent({
+      id: 0,
+      fullname: "string",
+      birthday: "string",
+      idcard: 0,
+      classsv: "string",
+    });
+    setOpenAdd(true);
+  };
+  const handleClickOpenEdit = (student: DSSV) => {
+    setCurrentStudent(student);
+    setOpenEdit(true);
+  };
+  const handleEditStudent = () => {
+    setRows((prev) =>
+      prev.map((student) =>
+        student.id === currentStudent.id ? currentStudent : student
+      )
+    );
+    setOpenEdit(false);
+  };
+  const handleDeleteStudent = (id: number) => {
+    setRows((prev) => prev.filter((student) => student.id !== id));
+  };
 
   return (
-    <>
+    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
       <TableContainer component={Paper}>
         <Table aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>ID</TableCell>
-              <TableCell align="right">Họ</TableCell>
-              <TableCell align="right">Tên</TableCell>
-              <TableCell align="right">Email</TableCell>
-              <TableCell align="right">Số điện thoại</TableCell>
+              <TableCell>Họ</TableCell>
+              <TableCell>Tên</TableCell>
+              <TableCell>Email</TableCell>
+              <TableCell>Số điện thoại</TableCell>
               <TableCell align="center">Thao tác</TableCell>
             </TableRow>
           </TableHead>
@@ -80,14 +104,34 @@ export default function QLSV() {
           <TableBody>
             {rows.map((student) => (
               <TableRow key={student.id}>
-                <TableCell>{student.id}</TableCell>
-                <TableCell align="right">{student.firstname}</TableCell>
-                <TableCell align="right">{student.lastname}</TableCell>
-                <TableCell align="right">{student.email}</TableCell>
-                <TableCell align="right">{student.phone}</TableCell>
+                <TableCell>{student.fullname}</TableCell>
+                <TableCell>{student.birthday}</TableCell>
+                <TableCell>{student.idcard}</TableCell>
+                <TableCell>{student.classsv}</TableCell>
                 <TableCell align="center">
-                  <Button variant="contained" onClick={() => setOpenAdd(true)}>
-                    Thêm mới
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleClickOpenAdd()}
+                    color="primary"
+                    sx={{ mr: 1 }}
+                  >
+                    ➕ Thêm{" "}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleClickOpenEdit(student)}
+                    color="primary"
+                    sx={{ mr: 1 }}
+                  >
+                    ✏️ Sửa{" "}
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    onClick={() => handleDeleteStudent(student.id)}
+                    color="error"
+                    sx={{ mr: 1 }}
+                  >
+                    🗑️ Xóa{" "}
                   </Button>
                 </TableCell>
               </TableRow>
@@ -102,33 +146,33 @@ export default function QLSV() {
           <TextField
             fullWidth
             margin="dense"
-            name="firstname"
+            name="fullname"
             label="Họ"
-            value={currentStudent.firstname}
+            value={currentStudent.fullname}
             onChange={handleChange}
           />
           <TextField
             fullWidth
             margin="dense"
-            name="lastname"
-            label="Tên"
-            value={currentStudent.lastname}
+            name="birthday"
+            label="Ngày sinh"
+            value={currentStudent.birthday}
             onChange={handleChange}
           />
           <TextField
             fullWidth
             margin="dense"
-            name="email"
-            label="Email"
-            value={currentStudent.email}
+            name="idcard"
+            label="Số CCCD/CMND"
+            value={currentStudent.idcard}
             onChange={handleChange}
           />
           <TextField
             fullWidth
             margin="dense"
-            name="phone"
-            label="Số điện thoại"
-            value={currentStudent.phone}
+            name="classsv"
+            label="Lớp"
+            value={currentStudent.classsv}
             onChange={handleChange}
           />
         </DialogContent>
@@ -140,11 +184,68 @@ export default function QLSV() {
           >
             Thêm
           </Button>
-          <Button onClick={() => setOpenAdd(false)} color="secondary">
+          <Button
+            onClick={() => setOpenAdd(false)}
+            color="error"
+            variant="outlined"
+          >
             Hủy
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+      <Dialog open={openEdit} onClose={() => setOpenEdit(false)}>
+        <DialogTitle>Sửa thông tin sinh viên</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            margin="dense"
+            name="fullname"
+            label="Họ"
+            value={currentStudent.fullname}
+            onChange={handleChange}
+          />
+          <TextField
+            fullWidth
+            margin="dense"
+            name="birthday"
+            label="Ngày sinh"
+            value={currentStudent.birthday}
+            onChange={handleChange}
+          />
+          <TextField
+            fullWidth
+            margin="dense"
+            name="idcard"
+            label="Số CCCD/CMND"
+            value={currentStudent.idcard}
+            onChange={handleChange}
+          />
+          <TextField
+            fullWidth
+            margin="dense"
+            name="classsv"
+            label="Lớp"
+            value={currentStudent.classsv}
+            onChange={handleChange}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => handleEditStudent()}
+            variant="contained"
+            color="primary"
+          >
+            Sửa
+          </Button>
+          <Button
+            onClick={() => setOpenEdit(false)}
+            color="error"
+            variant="outlined"
+          >
+            Hủy
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
 }
